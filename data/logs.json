@@ -1,0 +1,142 @@
+[
+  {
+    "query": "explain normalization",
+    "retrieved_docs": [],
+    "scores": [],
+    "prompt": "SYSTEM: You are a helpful assistant. Answer the user's question using ONLY the provided context. If the context does not contain enough information, say 'I don't know based on the provided context.' Do not fabricate information.\n\nCONTEXT:\n\n\nQUESTION: explain normalization\n\nANSWER:",
+    "response": "Based on the provided context, the answer relates to the topic described in the documents.",
+    "latency": 0.3005865999998605,
+    "timestamp": "2026-04-03T04:01:05.997954",
+    "evaluations": {
+      "retrieval": {
+        "avg_score": 0.0,
+        "min_score": 0.0,
+        "doc_count": 0,
+        "retrieval_ok": false,
+        "flag": "NO_DOCS_RETRIEVED"
+      },
+      "prompt": {
+        "has_context": true,
+        "has_instruction": true,
+        "has_grounding": true,
+        "token_estimate": 70,
+        "within_token_limit": true,
+        "score": 100,
+        "flag": "OK"
+      },
+      "hallucination": {
+        "response_context_similarity": 0.0,
+        "grounded_sentence_ratio": 0.0,
+        "hallucination_risk": true,
+        "flag": "CANNOT_EVALUATE"
+      },
+      "latency": {
+        "latency_seconds": 0.301,
+        "tier": "FAST",
+        "flag": "OK"
+      }
+    },
+    "analysis": {
+      "issues": [
+        {
+          "issue_type": "RETRIEVAL_FAILURE",
+          "confidence": 1.0,
+          "description": "Retrieved documents have low average similarity (0.000). The vector store may not contain relevant content, or the query is outside the indexed domain.",
+          "affected_stage": "retrieval"
+        },
+        {
+          "issue_type": "HALLUCINATION",
+          "confidence": 1.0,
+          "description": "Response has low semantic overlap with retrieved context (similarity=0.000, grounded_ratio=0.00%). The model may be relying on parametric knowledge rather than context.",
+          "affected_stage": "generation"
+        }
+      ],
+      "primary": {
+        "issue_type": "RETRIEVAL_FAILURE",
+        "confidence": 1.0,
+        "description": "Retrieved documents have low average similarity (0.000). The vector store may not contain relevant content, or the query is outside the indexed domain.",
+        "affected_stage": "retrieval"
+      },
+      "overall_pass": false,
+      "issue_count": 2
+    },
+    "suggestions": [
+      {
+        "action": "Increase top_k retrieval count",
+        "detail": "Raise TOP_K from 3 \u2192 5-10 to give the model more candidate passages.",
+        "code_hint": "retrieve(query, top_k=8)",
+        "priority": "HIGH",
+        "related_issue": "RETRIEVAL_FAILURE",
+        "issue_confidence": 1.0
+      },
+      {
+        "action": "Re-chunk documents with smaller chunks",
+        "detail": "Reduce CHUNK_SIZE (e.g. 500 \u2192 200 chars) so embeddings are more focused and similarity scores are higher for narrow questions.",
+        "code_hint": "chunk_text(doc, size=200, overlap=30)",
+        "priority": "HIGH",
+        "related_issue": "RETRIEVAL_FAILURE",
+        "issue_confidence": 1.0
+      },
+      {
+        "action": "Upgrade embedding model",
+        "detail": "Switch from text-embedding-ada-002 to text-embedding-3-large for ~10-20% better retrieval accuracy on technical content.",
+        "code_hint": "model='text-embedding-3-large'",
+        "priority": "MEDIUM",
+        "related_issue": "RETRIEVAL_FAILURE",
+        "issue_confidence": 1.0
+      },
+      {
+        "action": "Add query expansion / HyDE",
+        "detail": "Generate a hypothetical answer to the query and embed that instead (Hypothetical Document Embeddings). Narrows the gap between query and document distribution.",
+        "code_hint": "# Generate: 'A document that would answer: {query}' and embed it",
+        "priority": "MEDIUM",
+        "related_issue": "RETRIEVAL_FAILURE",
+        "issue_confidence": 1.0
+      },
+      {
+        "action": "Ingest more / better documents",
+        "detail": "If similarity scores are universally low, the knowledge base may not cover this topic. Add relevant documents and re-index.",
+        "code_hint": "ingest_documents([{'title': '...', 'content': '...'}])",
+        "priority": "HIGH",
+        "related_issue": "RETRIEVAL_FAILURE",
+        "issue_confidence": 1.0
+      },
+      {
+        "action": "Add grounding constraint to prompt",
+        "detail": "Explicitly forbid the model from using outside knowledge: 'Answer ONLY from the context. Do not use prior knowledge.'",
+        "code_hint": "SYSTEM_PROMPT = 'Use only the context. Do not use prior knowledge.'",
+        "priority": "HIGH",
+        "related_issue": "HALLUCINATION",
+        "issue_confidence": 1.0
+      },
+      {
+        "action": "Lower LLM temperature",
+        "detail": "Set temperature=0.0 or 0.1 to reduce creative generation and anchor responses closer to retrieved text.",
+        "code_hint": "temperature=0.0",
+        "priority": "HIGH",
+        "related_issue": "HALLUCINATION",
+        "issue_confidence": 1.0
+      },
+      {
+        "action": "Use post-generation grounding check",
+        "detail": "After generation, embed each response sentence and verify its cosine similarity to context. Reject and retry if below 0.6.",
+        "code_hint": "# Sentence-level similarity check before returning to user",
+        "priority": "MEDIUM",
+        "related_issue": "HALLUCINATION",
+        "issue_confidence": 1.0
+      },
+      {
+        "action": "Improve retrieval quality first",
+        "detail": "Hallucinations often stem from poor retrieval. Fix retrieval issues first \u2014 if the context is strong, the model has less incentive to improvise.",
+        "code_hint": "# See RETRIEVAL_FAILURE suggestions",
+        "priority": "HIGH",
+        "related_issue": "HALLUCINATION",
+        "issue_confidence": 1.0
+      }
+    ],
+    "status": "fail",
+    "issue_count": 2,
+    "primary_issue": "RETRIEVAL_FAILURE",
+    "id": "e1622154-05c3-4079-857c-8d112f8b18d1"
+  }
+]
